@@ -20,12 +20,11 @@ jobs:
 
       - name: Restore dependencies
         working-directory: RepositoryAndUnitOfWorkPattern
-        run: dotnet restore RepositoryAndUnitOfWork.csproj
+        run: dotnet restore RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork/RepositoryAndUnitOfWork.csproj
 
       - name: Build Application
-        working-directory: RepositoryAndUnitOfWorkPattern.Tests
-        run: dotnet build RepositoryAndUnitOfWork.Tests.csproj --no-restore --verbosity normal
+        run: dotnet build RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork/RepositoryAndUnitOfWork.csproj --no-restore --verbosity normal
 
       - name: Publish Application
         working-directory: RepositoryAndUnitOfWorkPattern
-        run: dotnet publish RepositoryAndUnitOfWork.csproj --configuration Release --no-restore --output ./publish
+        run: dotnet publish RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork/RepositoryAndUnitOfWork.csproj --configuration Release --no-restore --output ./publish
