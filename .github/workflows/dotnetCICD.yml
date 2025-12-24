@@ -22,7 +22,7 @@ jobs:
         run: dotnet restore RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj
 
       - name: Build Application
-        run: dotnet build RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.csproj --no-restore --verbosity normal
+        run: dotnet build RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccesscsproj --no-restore --verbosity normal
 
       - name: Publish Application
-        run: dotnet publish RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.csproj --configuration Release --no-restore --output ./publish
+        run: dotnet publish RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj --configuration Release --no-restore --output ./publish
