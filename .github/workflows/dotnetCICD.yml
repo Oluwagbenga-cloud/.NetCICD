@@ -8,21 +8,19 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "8.0.x"
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
 
-      - name: Restore dependencies
-        run: dotnet restore RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
 
-      - name: Build Application
-        run: dotnet build RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccesscsproj --no-restore --verbosity normal
+      - name: Restore packages
+        run: nuget restore RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.sln
 
-      - name: Publish Application
-        run: dotnet publish RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj --configuration Release --no-restore --output ./publish
+      - name: Build solution
+        run: msbuild RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.sln /p:Configuration=Release
