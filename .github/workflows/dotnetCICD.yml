@@ -1,50 +1,3 @@
-# name: .NET CICD
-
-# on:
-#   push:
-#     branches: [main]
-#   pull_request:
-#     branches: [main]
-
-# jobs:
-#   build:
-#     runs-on: windows-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-#         with:
-#           path: .
-
-#       - name: List files
-#         run: |
-#           dir
-#           if exist RepositoryAndUnitOfWorkPattern dir RepositoryAndUnitOfWorkPattern
-#           if exist RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln echo "Solution found"
-
-#       - name: Setup MSBuild
-#         uses: microsoft/setup-msbuild@v1
-
-#       - name: Setup NuGet
-#         uses: NuGet/setup-nuget@v1
-
-#       - name: Restore packages
-#         run: |
-#           if exist RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln (
-#             nuget restore RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln
-#           ) else (
-#             echo "Solution file not found"
-#             exit 1
-#           )
-
-#       - name: Build solution
-#         run: msbuild RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln /p:Configuration=Release
-
-#       - name: Publish artifacts
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: published-app
-#           path: RepositoryAndUnitOfWorkPattern/**/bin/Release/** 
-
 name: .NET
 
 on:
@@ -54,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env: 
-  PROJECT_PATH: 'RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj'
+  # PROJECT_PATH: 'RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj'
   PROJECT_NAME: 'RepositoryAndUnitOfWork.DataAccess'
   BUILD_CONFIGURATION: 'Release'
 jobs:
@@ -75,17 +28,25 @@ jobs:
         nuget-version: "latest"
 
     - name: restore Nuget
-      run:  nuget restore ${{ env.PROJECT_PATH }}
+      run:  nuget restore RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj
 
     - name: build project
       run:  |
-        msbuild $env:PROJECT_PATH `
+        msbuild RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj `
             /p:Configuration=$env:BUILD_CONFIGURATION `
             /p:Platform="Any CPU" `
             /t:Build `
             /v:normal `
             /m
-        shell: powershell 
+
+      shell: powershell 
+
+
+    - name: Debug project location
+      run: |
+       echo "Searching for csproj files..."
+       Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object FullName
+      shell: powershell
 
     - name: prepare artifact folder
       run: |
@@ -97,13 +58,13 @@ jobs:
 
           Write-Host "Artifacts prepared from:"
           Write-Host "  $buildOutput"
-        shell: powershell
       shell: powershell 
 
     - name: package artifact
       run: |
         Compress-Archive -Path artifacts\* -DestinationPath class-library-build.zip -Force
-        shell: powershell
+
+      shell: powershell
       
     - name: upload artifact
       uses: actions/upload-artifact@v4
