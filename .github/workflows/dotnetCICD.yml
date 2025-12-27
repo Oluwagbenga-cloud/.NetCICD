@@ -48,12 +48,12 @@ jobs:
             -Path "RepositoryAndUnitOfWorkPattern/**/bin/${{ env.BUILD_CONFIGURATION }}/*" `
             -Destination artifacts `
             -Recurse -Force
-        shell: powershell
+      shell: powershell
 
     - name: package artifact
       run: |
         Compress-Archive -Path artifacts\* -DestinationPath dotnet-framework-build.zip -Force
-        shell: powershell
+      shell: powershell
       
     - name: upload artifact
       uses: actions/upload-artifact@v4
