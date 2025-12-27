@@ -1,35 +1,112 @@
-name: .NET CICD
+# name: .NET CICD
+
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+
+# jobs:
+#   build:
+#     runs-on: windows-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           path: .
+
+#       - name: List files
+#         run: |
+#           dir
+#           if exist RepositoryAndUnitOfWorkPattern dir RepositoryAndUnitOfWorkPattern
+#           if exist RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln echo "Solution found"
+
+#       - name: Setup MSBuild
+#         uses: microsoft/setup-msbuild@v1
+
+#       - name: Setup NuGet
+#         uses: NuGet/setup-nuget@v1
+
+#       - name: Restore packages
+#         run: |
+#           if exist RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln (
+#             nuget restore RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln
+#           ) else (
+#             echo "Solution file not found"
+#             exit 1
+#           )
+
+#       - name: Build solution
+#         run: msbuild RepositoryAndUnitOfWorkPattern\RepositoryAndUnitOfWork.sln /p:Configuration=Release
+
+#       - name: Publish artifacts
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: published-app
+#           path: RepositoryAndUnitOfWorkPattern/**/bin/Release/** 
+
+name: .NET
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
   pull_request:
-    branches: [main]
+    branches: [ "main" ]
 
+env: 
+  PROJECT_PATH: 'RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj'
+  PROJECT_NAME: 'RepositoryAndUnitOfWork.DataAccess'
+  BUILD_CONFIGURATION: 'Release'
 jobs:
   build:
+
     runs-on: windows-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: checkout code
+      uses: actions/checkout@v4
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
+    - name: setup NuGet
+      uses: Nuget/setup-nuget@v2
+      with:
+        nuget-version: "latest"
 
-      - name: List files
-        run: dir
+    - name: restore Nuget
+      run:  nuget restore ${{ env.PROJECT_PATH }}
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
+    - name: build project
+      run:  |
+        msbuild $env:PROJECT_PATH `
+            /p:Configuration=$env:BUILD_CONFIGURATION `
+            /p:Platform="Any CPU" `
+            /t:Build `
+            /v:normal `
+            /m
+        shell: powershell 
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1
+    - name: prepare artifact folder
+      run: |
+       $buildOutput = Join-Path "${{ env.PROJECT_NAME }}" "bin\${{ env.BUILD_CONFIGURATION }}"
+          $artifactDir = "artifacts"
 
-      - name: Restore packages
-        run: nuget restore RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.sln
+          New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null
+          Copy-Item -Path "$buildOutput\*" -Destination $artifactDir -Recurse -Force
 
-      - name: Build solution
-        run: msbuild RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.sln /p:Configuration=Release
+          Write-Host "Artifacts prepared from:"
+          Write-Host "  $buildOutput"
+        shell: powershell
+      shell: powershell 
 
-      - name: Publish artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: published-app
-          path: RepositoryAndUnitOfWorkPattern/**/bin/Release/**
+    - name: package artifact
+      run: |
+        Compress-Archive -Path artifacts\* -DestinationPath class-library-build.zip -Force
+        shell: powershell
+      
+    - name: upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: class-library-build
+        path: class-library-build.zip
