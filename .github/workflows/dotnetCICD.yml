@@ -8,7 +8,7 @@ on:
 
 env: 
   # PROJECT_PATH: 'RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj'
-  PROJECT_NAME: 'RepositoryAndUnitOfWork.DataAccess'
+  SOLUTION_PATH: 'RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.sln'
   BUILD_CONFIGURATION: 'Release'
 jobs:
   build:
@@ -26,21 +26,12 @@ jobs:
       uses: Nuget/setup-nuget@v2
       with:
         nuget-version: "latest"
-
-    - name: Debug project location
-      shell: powershell
-      run: |
-       Write-Host "Searching for csproj files..."
-       Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object FullName
-      
-
     - name: restore Nuget
-      working-directory: RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess
-      run: nuget restore RepositoryAndUnitOfWork.DataAccess.csproj
+      run: nuget restore ${{ env.SOLUTION_PATH }}
 
-    - name: build project
+    - name: build solution
       run:  |
-        msbuild RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj `
+        msbuild ${{ env.SOLUTION_PATH }} `
             /p:Configuration=$env:BUILD_CONFIGURATION `
             /p:Platform="Any CPU" `
             /t:Build `
@@ -49,26 +40,23 @@ jobs:
 
       shell: powershell 
 
-    - name: prepare artifact folder
+    - name: collect built artifact
       run: |
-       $buildOutput = Join-Path "${{ env.PROJECT_NAME }}" "bin\${{ env.BUILD_CONFIGURATION }}"
-          $artifactDir = "artifacts"
+        New-Item -ItemType Directory -Path artifacts -Force | Out-Null
 
-          New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null
-          Copy-Item -Path "$buildOutput\*" -Destination $artifactDir -Recurse -Force
-
-          Write-Host "Artifacts prepared from:"
-          Write-Host "  $buildOutput"
-      shell: powershell 
+          Copy-Item `
+            -Path "RepositoryAndUnitOfWorkPattern/**/bin/${{ env.BUILD_CONFIGURATION }}/*" `
+            -Destination artifacts `
+            -Recurse -Force
+        shell: powershell
 
     - name: package artifact
       run: |
-        Compress-Archive -Path artifacts\* -DestinationPath class-library-build.zip -Force
-
-      shell: powershell
+        Compress-Archive -Path artifacts\* -DestinationPath dotnet-framework-build.zip -Force
+        shell: powershell
       
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: class-library-build
-        path: class-library-build.zip
+        name: dotnet-framework-build
+        path: dotnet-framework-build.zip
