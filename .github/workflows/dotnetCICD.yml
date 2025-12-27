@@ -27,6 +27,12 @@ jobs:
       with:
         nuget-version: "latest"
 
+    - name: Debug project location
+      run: |
+       echo "Searching for csproj files..."
+       Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object FullName
+      shell: powershell
+
     - name: restore Nuget
       run:  nuget restore RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj
 
@@ -40,13 +46,6 @@ jobs:
             /m
 
       shell: powershell 
-
-
-    - name: Debug project location
-      run: |
-       echo "Searching for csproj files..."
-       Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object FullName
-      shell: powershell
 
     - name: prepare artifact folder
       run: |
