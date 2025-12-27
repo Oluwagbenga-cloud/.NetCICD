@@ -28,13 +28,15 @@ jobs:
         nuget-version: "latest"
 
     - name: Debug project location
-      run: |
-       echo "Searching for csproj files..."
-       Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object FullName
       shell: powershell
+      run: |
+       Write-Host "Searching for csproj files..."
+       Get-ChildItem -Recurse -Filter "*.csproj" | Select-Object FullName
+      
 
     - name: restore Nuget
-      run:  nuget restore RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess/RepositoryAndUnitOfWork.DataAccess.csproj
+      working-directory: RepositoryAndUnitOfWorkPattern/RepositoryAndUnitOfWork.DataAccess
+      run: nuget restore RepositoryAndUnitOfWork.DataAccess.csproj
 
     - name: build project
       run:  |
