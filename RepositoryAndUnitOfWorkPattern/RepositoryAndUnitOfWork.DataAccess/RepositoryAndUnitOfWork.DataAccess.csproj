@@ -113,12 +113,12 @@
       <DependentUpon>CustomerDataModel.edmx</DependentUpon>
       <LastGenOutput>CustomerDataModel.cs</LastGenOutput>
     </Content>
-    <Content Include="Database\CustomerDb.mdf">
+    <!-- <Content Include="Database\CustomerDb.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Database\CustomerDb_log.ldf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </Content> -->
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
